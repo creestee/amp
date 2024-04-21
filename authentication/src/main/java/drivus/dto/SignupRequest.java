@@ -18,5 +18,9 @@ public record SignupRequest(
         @Schema(description = "password", example = "123456")
         @NotBlank(message = "Password cannot be blank")
         @Size(min = 6, max = 20, message = "Password must be between 6 and 20 characters")
-        String password) {
+        String password,
+
+        @Schema(description = "is_service_provider", example = "true")
+        @NotBlank(message = "is_service_provider must be true or false")
+        boolean isServiceProvider) {
 }
