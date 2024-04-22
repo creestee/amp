@@ -5,6 +5,21 @@ spring:
     client:
       hostname: localhost
 
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
+
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/login,/api/auth/signup
+
+  main:
+    web-application-type: reactive
+
 server:
   port: 9000
 eureka:
