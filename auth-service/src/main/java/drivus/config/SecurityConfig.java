@@ -43,8 +43,8 @@ public class SecurityConfig {
 //            our public endpoints
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/authentication-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/auth/loginAttempts/**").hasRole("SERVICE_PROVIDER"))
+                        .requestMatchers(HttpMethod.GET, "/authentication-docs/**").permitAll())
+//                        .requestMatchers(HttpMethod.GET, "/api/auth/loginAttempts/**").hasRole("SERVICE_PROVIDER"))
                 .authenticationManager(authenticationManager)
 
 //        We need jwt filter before the UsernamePasswordAuthenticationFilter.
