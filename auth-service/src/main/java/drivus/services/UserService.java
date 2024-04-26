@@ -5,36 +5,32 @@ import drivus.exceptions.DuplicateException;
 import drivus.model.User;
 import drivus.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
+@RequiredArgsConstructor
 @Service
 public class UserService {
 
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repository, PasswordEncoder passwordEncoder) {
-        this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
     @Transactional
     public void signup(SignupRequest request) {
-        String email = request.email();
-        Optional<User> existingUser = repository.findByEmail(email);
-        if (existingUser.isPresent()) {
-            throw new DuplicateException(String.format("User with the email address '%s' already exists.", email));
+        if (repository.existsByEmail(request.email())) {
+            throw new DuplicateException(String.format("User with the email address '%s' already exists.", request.email()));
         }
 
-        String hashedPassword = passwordEncoder.encode(request.password());
+        if (repository.existsByUsername(request.name())) {
+            throw new DuplicateException(String.format("User with the username '%s' already exists.", request.name()));
+        }
+
         User user = new User();
-        user.setEmail(email);
-        user.setPassword(hashedPassword);
-        user.setServiceProvider(request.isServiceProvider());
+        user.setEmail(request.email());
         user.setUsername(request.name());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setServiceProvider(request.isServiceProvider());
 
         repository.saveAndFlush(user);
     }
