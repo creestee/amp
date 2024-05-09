@@ -1,5 +1,5 @@
 server:
-  port: 8555
+  port: ${PORT:0}
 spring:
   cloud:
     client:
@@ -38,14 +38,15 @@ springdoc:
   swagger-ui:
     path: /authentication-docs/swagger-ui-custom.html
 
-#eureka:
-#  client:
-#    registerWithEureka: true
-#    serviceUrl:
-#      defaultZone: http://localhost:8761/eureka/
-#  instance:
-#    prefer-ip-address: true
-#    hostname: localhost
+eureka:
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 amp:
   app:

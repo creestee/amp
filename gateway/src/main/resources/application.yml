@@ -12,10 +12,22 @@ spring:
           lowerCaseServiceId: true
 
       routes:
-        - id: auth-service
+        - id: auth-service-signup
           uri: lb://auth-service
           predicates:
-            - Path=/api/auth/login,/api/auth/signup
+            - Path=/api/auth/signup
+        - id: auth-service-login
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/login,/api/auth/refreshtoken,/api/auth/logout
+        - id: auth-service-test
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/test/**
+            - Method=GET
+            - Cookie=amp-jwt, (.*)
+          filters:
+            - AuthorizationCookieFilter
 
   main:
     web-application-type: reactive
@@ -27,3 +39,8 @@ eureka:
     registerWithEureka: true
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+
+
+amp:
+  app:
+    jwtSecret: "======================AMP=BACKEND==========================="
