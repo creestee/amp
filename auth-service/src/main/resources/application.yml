@@ -54,4 +54,3 @@ amp:
     jwtRefreshCookieName: "amp-jwt-refresh"
     jwtSecret: "======================AMP=BACKEND==========================="
     jwtExpirationMs: 60000
-    jwtRefreshExpirationMs: 86400

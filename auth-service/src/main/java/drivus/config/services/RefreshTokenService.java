@@ -10,15 +10,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 public class RefreshTokenService {
-    @Value("${amp.app.jwtRefreshExpirationMs}")
-    private Long refreshTokenDurationS;
-
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
 
@@ -30,7 +28,7 @@ public class RefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
 
         refreshToken.setUser(userRepository.findFirstById(userId).orElse(null));
-        refreshToken.setExpiryDate(Instant.now().plusSeconds(refreshTokenDurationS));
+        refreshToken.setExpiryDate(Instant.now().plus(1, ChronoUnit.WEEKS));
         refreshToken.setToken(UUID.randomUUID().toString());
 
         refreshToken = refreshTokenRepository.save(refreshToken);
@@ -38,7 +36,7 @@ public class RefreshTokenService {
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+        if (Instant.now().isAfter(token.getExpiryDate())) {
             refreshTokenRepository.delete(token);
             throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new signin request");
         }
