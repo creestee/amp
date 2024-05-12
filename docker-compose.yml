@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  usersdb:
+  drivusdb:
     image: postgres:latest
-    container_name: usersdb
+    container_name: drivusdb
     environment:
       POSTGRES_DB: users
       POSTGRES_USER: user
@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - usersdb-data:/var/lib/postgresql/data
+      - drivusdb-data:/var/lib/postgresql/data
 
   redis-cache:
     image: redis
@@ -22,4 +22,4 @@ services:
       - REDIS_PASSWORD=password
 
 volumes:
-  usersdb-data:
+  drivusdb-data:
