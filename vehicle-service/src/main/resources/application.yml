@@ -6,10 +6,10 @@ spring:
       hostname: localhost
   application:
     name: vehicle-service
-#  datasource:
-#    url: ${DB_USERS_URL}
-#    username: ${DB_USERS_USER}
-#    password: ${DB_USERS_PASSWORD}
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   jpa:
     defer-datasource-initialization: true
     properties:
