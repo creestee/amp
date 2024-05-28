@@ -7,6 +7,7 @@ import drivus.repository.AppointmentStatusRepository;
 import drivus.exception.AppointmentStatusNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,11 +23,17 @@ import java.util.stream.Collectors;
 public class AppointmentStatusService {
 
     private final AppointmentStatusRepository repository;
+    private final RabbitTemplate rabbitTemplate;
 
     public AppointmentStatusResponse createAppointmentStatus(AppointmentStatusRequest request) {
         log.info("Creating appointment status for appointment {}", request.appointmentId());
         AppointmentStatus savedAppointmentStatus = repository.save(mapRequestToEntity(request));
-        return mapEntityToResponse(savedAppointmentStatus);
+
+        AppointmentStatusResponse response = mapEntityToResponse(savedAppointmentStatus);
+
+        rabbitTemplate.convertAndSend("appointmentStatusExchange", "appointmentStatusCreated", response);
+
+        return response;
     }
 
     public AppointmentStatusResponse getAppointmentStatus(Long id) {

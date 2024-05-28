@@ -1,6 +1,11 @@
 server:
   port: ${PORT:0}
 spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: password
   cloud:
     client:
       hostname: localhost
