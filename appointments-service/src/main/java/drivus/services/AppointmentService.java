@@ -7,6 +7,8 @@ import drivus.repository.AppointmentRepository;
 import drivus.exception.AppointmentNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +42,7 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
+    @CachePut(value = "appointments", key = "#id")
     public AppointmentResponse updateAppointment(Long id, AppointmentRequest request) {
         log.info("Updating appointment with id {}", id);
         Appointment appointment = repository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment with id " + id + " not found"));
@@ -47,6 +50,7 @@ public class AppointmentService {
         return mapEntityToResponse(updatedAppointment);
     }
 
+    @CacheEvict(value = "appointments", key = "#id")
     public void deleteAppointment(Long id) {
         log.info("Deleting appointment with id {}", id);
         Appointment appointment = repository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment with id " + id + " not found"));

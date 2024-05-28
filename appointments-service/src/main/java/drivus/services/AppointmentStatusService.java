@@ -7,6 +7,9 @@ import drivus.repository.AppointmentStatusRepository;
 import drivus.exception.AppointmentStatusNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +35,7 @@ public class AppointmentStatusService {
         return mapEntityToResponse(appointmentStatus);
     }
 
+    @Cacheable(value = "appointmentStatuses", key = "#appointmentId")
     public List<AppointmentStatusResponse> getAllAppointmentStatuses(Long appointmentId) {
         log.info("Fetching all appointment statuses for appointment {}", appointmentId);
         return repository.findByAppointmentId(appointmentId).stream()
@@ -39,6 +43,7 @@ public class AppointmentStatusService {
                 .collect(Collectors.toList());
     }
 
+    @CachePut(value = "appointmentStatuses", key = "#id")
     public AppointmentStatusResponse updateAppointmentStatus(Long id, AppointmentStatusRequest request) {
         log.info("Updating appointment status with id {}", id);
         AppointmentStatus appointmentStatus = repository.findById(id).orElseThrow(() -> new AppointmentStatusNotFoundException("Appointment status with id " + id + " not found"));
@@ -46,6 +51,7 @@ public class AppointmentStatusService {
         return mapEntityToResponse(updatedAppointmentStatus);
     }
 
+    @CacheEvict(value = "appointmentStatuses", key = "#id")
     public void deleteAppointmentStatus(Long id) {
         log.info("Deleting appointment status with id {}", id);
         AppointmentStatus appointmentStatus = repository.findById(id).orElseThrow(() -> new AppointmentStatusNotFoundException("Appointment status with id " + id + " not found"));
