@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,22 @@ public class AppointmentService {
         log.info("Creating appointment for user {}", request.userId());
         Appointment savedAppointment = repository.save(mapRequestToEntity(request));
         return mapEntityToResponse(savedAppointment);
+    }
+
+    @Cacheable(value = "ongoingAppointments", key = "#userId")
+    public AppointmentResponse getOngoingAppointmentForUser(Long userId) {
+        log.info("Fetching first ongoing appointment for user {}", userId);
+        Appointment appointment = repository.findFirstByUserIdAndIsOngoingTrue(userId)
+                .orElseThrow(() -> new AppointmentNotFoundException("No ongoing appointment found for user " + userId));
+        return mapEntityToResponse(appointment);
+    }
+
+    public List<AppointmentResponse> getAllFinishedAppointmentsForUser(Long userId) {
+        log.info("Fetching all finished appointments for user {}", userId);
+        List<Appointment> appointments = repository.findAllByUserIdAndIsOngoingFalse(userId);
+        return appointments.stream()
+                .map(this::mapEntityToResponse)
+                .collect(Collectors.toList());
     }
 
     @Cacheable(value = "appointments", key = "#id")
@@ -65,6 +82,7 @@ public class AppointmentService {
         appointment.setAppointmentDate(request.appointmentDate());
         appointment.setServiceType(request.serviceType());
         appointment.setNotes(request.notes());
+        appointment.setIsOngoing(request.isOngoing());
         return appointment;
     }
 
@@ -75,6 +93,7 @@ public class AppointmentService {
         appointment.setAppointmentDate(request.appointmentDate());
         appointment.setServiceType(request.serviceType());
         appointment.setNotes(request.notes());
+        appointment.setIsOngoing(request.isOngoing());
         return appointment;
     }
 
@@ -86,7 +105,8 @@ public class AppointmentService {
                 appointment.getServiceProviderId(),
                 appointment.getAppointmentDate(),
                 appointment.getServiceType(),
-                appointment.getNotes()
+                appointment.getNotes(),
+                appointment.getIsOngoing()
         );
     }
 }

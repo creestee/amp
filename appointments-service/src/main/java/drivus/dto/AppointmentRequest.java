@@ -8,5 +8,6 @@ public record AppointmentRequest(
         Long serviceProviderId,
         LocalDateTime appointmentDate,
         String serviceType,
-        String notes) {
+        String notes,
+        Boolean isOngoing){
 }

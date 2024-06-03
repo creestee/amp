@@ -69,6 +69,7 @@ public class AppointmentStatusService {
         AppointmentStatus appointmentStatus = new AppointmentStatus();
         appointmentStatus.setAppointmentId(request.appointmentId());
         appointmentStatus.setStatus(request.status());
+        appointmentStatus.setNotes(request.notes());
         appointmentStatus.setCreatedAt(LocalDateTime.now());
         return appointmentStatus;
     }
@@ -76,6 +77,7 @@ public class AppointmentStatusService {
     private AppointmentStatus mapRequestUpdateToEntity(AppointmentStatus appointmentStatus, AppointmentStatusRequest request) {
         appointmentStatus.setAppointmentId(request.appointmentId());
         appointmentStatus.setStatus(request.status());
+        appointmentStatus.setNotes(request.notes());
         appointmentStatus.setCreatedAt(LocalDateTime.now());
         return appointmentStatus;
     }
@@ -85,7 +87,8 @@ public class AppointmentStatusService {
                 appointmentStatus.getId(),
                 appointmentStatus.getAppointmentId(),
                 appointmentStatus.getStatus(),
-                appointmentStatus.getCreatedAt()
+                appointmentStatus.getCreatedAt(),
+                appointmentStatus.getNotes()
         );
     }
 }

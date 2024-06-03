@@ -12,6 +12,10 @@ spring:
           lowerCaseServiceId: true
 
       routes:
+        - id: appointments-service
+          uri: lb://appointments-service
+          predicates:
+            - Path=/api/appointments/**
         - id: auth-service-signup
           uri: lb://auth-service
           predicates:

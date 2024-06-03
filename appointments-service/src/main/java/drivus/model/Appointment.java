@@ -18,6 +18,9 @@ public class Appointment {
     @Column(name = "userId", nullable = false)
     private Long userId;
 
+    @Column(name = "isOngoing", nullable = false)
+    private Boolean isOngoing;
+
     @Column(name = "vehicleId", nullable = false)
     private Long vehicleId;
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("/api/appointments")
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
@@ -25,6 +25,16 @@ public class AppointmentController {
     @GetMapping("/{id}")
     public ResponseEntity<AppointmentResponse> getAppointment(@PathVariable Long id) {
         return new ResponseEntity<>(appointmentService.getAppointment(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/ongoing/{userId}")
+    public ResponseEntity<AppointmentResponse> getFirstOngoingAppointmentForUser(@PathVariable Long userId) {
+        return new ResponseEntity<>(appointmentService.getOngoingAppointmentForUser(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/finished/{userId}")
+    public ResponseEntity<List<AppointmentResponse>> getAllFinishedAppointmentsForUser(@PathVariable Long userId) {
+        return new ResponseEntity<>(appointmentService.getAllFinishedAppointmentsForUser(userId), HttpStatus.OK);
     }
 
     @GetMapping

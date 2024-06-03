@@ -23,4 +23,7 @@ public class AppointmentStatus {
 
     @Column(name = "createdAt", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "notes", nullable = false)
+    private String notes;
 }
