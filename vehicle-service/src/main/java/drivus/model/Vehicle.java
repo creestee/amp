@@ -13,6 +13,9 @@ public class Vehicle {
     @Column(unique = true, nullable = false)
     private Long id;
 
+    @Column(name = "userId", nullable = false)
+    private Long userId;
+
     @Column(name = "brand", nullable = false)
     private String brand;
 

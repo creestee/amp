@@ -2,6 +2,7 @@ package drivus.config.services;
 
 import drivus.exceptions.TokenRefreshException;
 import drivus.model.RefreshToken;
+import drivus.model.User;
 import drivus.repository.RefreshTokenRepository;
 import drivus.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -25,10 +26,19 @@ public class RefreshTokenService {
     }
 
     public RefreshToken createRefreshToken(Long userId) {
+        // Find the user
+        User user = userRepository.findFirstById(userId).orElse(null);
+
+        // Check if a refresh token already exists for the user
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByUser(user);
+        if (existingToken.isPresent()) {
+            return existingToken.get();
+        }
+
         RefreshToken refreshToken = new RefreshToken();
 
         refreshToken.setUser(userRepository.findFirstById(userId).orElse(null));
-        refreshToken.setExpiryDate(Instant.now().plus(1, ChronoUnit.WEEKS));
+        refreshToken.setExpiryDate(Instant.now().plus(7, ChronoUnit.DAYS));
         refreshToken.setToken(UUID.randomUUID().toString());
 
         refreshToken = refreshTokenRepository.save(refreshToken);
