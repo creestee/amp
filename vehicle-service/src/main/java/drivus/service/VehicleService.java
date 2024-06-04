@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,8 @@ public class VehicleService {
     private final VehicleRepository repository;
 
     @Transactional
+    @Caching(put = @CachePut(cacheNames = "vehicle", key = "#result.id"),
+            evict = @CacheEvict(cacheNames = "vehicles", allEntries = true))
     public CreateVehicleResponse createVehicle(CreateVehicleRequest createVehicleRequest) {
         Vehicle vehicle = new Vehicle();
         vehicle.setBrand(createVehicleRequest.brand());
@@ -35,19 +38,24 @@ public class VehicleService {
     }
 
     @Cacheable(value = "vehicle", key = "#id")
-    public Vehicle getVehicle(Long id) {
-        return repository.findById(id)
+    public CreateVehicleResponse getVehicle(Long id) {
+        Vehicle vehicle = repository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with id " + id));
+        return new CreateVehicleResponse(vehicle.getId(), vehicle.getUserId(), vehicle.getBrand(), vehicle.getModel(), vehicle.getYear(), vehicle.getFuelType());
     }
 
-    @Cacheable(value = "vehicleUser", key = "#userId")
-    public List<Vehicle> getVehiclesforUserId(Long userId) {
+    @Cacheable(value = "vehicles", key = "#userId")
+    public List<CreateVehicleResponse> getVehiclesforUserId(Long userId) {
         log.info("Fetching all vehicles for user {}", userId);
-        return repository.findByUserId(userId);
+        List<Vehicle> vehicles = repository.findByUserId(userId);
+        return vehicles.stream()
+                .map(vehicle -> new CreateVehicleResponse(vehicle.getId(), vehicle.getUserId(), vehicle.getBrand(), vehicle.getModel(), vehicle.getYear(), vehicle.getFuelType()))
+                .toList();
     }
 
     @Transactional
-    @CachePut(value = "vehicle", key = "#id")
+    @Caching(put = @CachePut(cacheNames = "vehicle", key = "#result.id"),
+            evict = @CacheEvict(cacheNames = "vehicles", allEntries = true))
     public Vehicle updateVehicle(Long id, CreateVehicleRequest createVehicleRequest) {
         Vehicle vehicle = repository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with id " + id));;
@@ -60,7 +68,10 @@ public class VehicleService {
     }
 
     @Transactional
-    @CacheEvict(value = "vehicle", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "vehicle", key = "#result.id"),
+            @CacheEvict(cacheNames = "vehicles", allEntries = true)
+    })
     public void deleteVehicle(Long id) {
         Vehicle vehicle = repository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with id " + id));;;

@@ -5,14 +5,15 @@ import drivus.dto.AppointmentResponse;
 import drivus.model.Appointment;
 import drivus.repository.AppointmentRepository;
 import drivus.exception.AppointmentNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,13 +24,16 @@ public class AppointmentService {
 
     private final AppointmentRepository repository;
 
+    @Transactional
+    @Caching(put = @CachePut(cacheNames = "appointment", key = "#result.id"),
+            evict = @CacheEvict(cacheNames = "appointments", allEntries = true))
     public AppointmentResponse createAppointment(AppointmentRequest request) {
         log.info("Creating appointment for user {}", request.userId());
         Appointment savedAppointment = repository.save(mapRequestToEntity(request));
         return mapEntityToResponse(savedAppointment);
     }
 
-    @Cacheable(value = "ongoingAppointments", key = "#userId")
+//    @Cacheable(value = "appointment", key = "#result.id")
     public AppointmentResponse getOngoingAppointmentForUser(Long userId) {
         log.info("Fetching first ongoing appointment for user {}", userId);
         Appointment appointment = repository.findFirstByUserIdAndIsOngoingTrue(userId)
@@ -45,13 +49,14 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "appointments", key = "#id")
+    @Cacheable(value = "appointment", key = "#id")
     public AppointmentResponse getAppointment(Long id) {
         log.info("Fetching appointment with id {}", id);
         Appointment appointment = repository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment with id " + id + " not found"));
         return mapEntityToResponse(appointment);
     }
 
+    @Cacheable(value = "appointments")
     public List<AppointmentResponse> getAllAppointments() {
         log.info("Fetching all appointments");
         return repository.findAll().stream()
@@ -59,7 +64,9 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    @CachePut(value = "appointments", key = "#id")
+    @Transactional
+    @Caching(put = @CachePut(cacheNames = "appointment", key = "#result.id"),
+            evict = @CacheEvict(cacheNames = "appointments", allEntries = true))
     public AppointmentResponse updateAppointment(Long id, AppointmentRequest request) {
         log.info("Updating appointment with id {}", id);
         Appointment appointment = repository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment with id " + id + " not found"));
@@ -67,7 +74,11 @@ public class AppointmentService {
         return mapEntityToResponse(updatedAppointment);
     }
 
-    @CacheEvict(value = "appointments", key = "#id")
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "appointment", key = "#result.id"),
+            @CacheEvict(cacheNames = "appointments", allEntries = true)
+    })
     public void deleteAppointment(Long id) {
         log.info("Deleting appointment with id {}", id);
         Appointment appointment = repository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment with id " + id + " not found"));
