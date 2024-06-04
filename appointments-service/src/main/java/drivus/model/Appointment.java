@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "appointments", schema = "drivus")
@@ -35,4 +36,7 @@ public class Appointment {
 
     @Column(name = "notes")
     private String notes;
+
+    @OneToMany(mappedBy = "appointment")
+    private List<AppointmentStatus> appointmentStatuses;
 }

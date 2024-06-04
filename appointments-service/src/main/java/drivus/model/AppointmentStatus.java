@@ -15,8 +15,9 @@ public class AppointmentStatus {
     @Column(unique = true, nullable = false)
     private Long id;
 
-    @Column(name = "appointmentId", nullable = false)
-    private Long appointmentId;
+    @ManyToOne
+    @JoinColumn(name = "appointmentId", nullable = false)
+    private Appointment appointment;
 
     @Column(name = "status", nullable = false)
     private String status;
